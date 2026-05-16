@@ -14,13 +14,31 @@ import {
 } from "@heroui/react";
 
 const Form = () => {
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
     const destination = Object.fromEntries(formData.entries());
     console.log(destination);
+
+//  server রেস্পন্স করবে fetch এর লাইন res এর মধ্যে  
+     const res = await fetch('http://localhost:5000/destinations',{
+      method: "POST",
+      headers:{
+        'Content-type': 'application/json'
+      }, // fetch করে method লিখে content-type লিখে বুঝানো যে এইটা post করছি
+
+      body: JSON.stringify(destination) //এখানে কি ; ব্যবহার করা যাবে আর কান যাবে না??
+
+
+    })
+
+    const data = await res.json();
+    console.log(data);
+
   };
+
+
 
   // 💡 সাবমিট বাটনের লোডিং স্টেট হ্যান্ডেল করার জন্য (আপাতত ফলস রাখা হয়েছে)
   const isPending = false;
