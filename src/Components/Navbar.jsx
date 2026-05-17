@@ -15,7 +15,6 @@ export default function Navbar() {
     { name: "Destinations", path: "/destinations" },
     { name: "My Bookings", path: "/my-bookings" },
     { name: "Add Destinations", path: "/add-destinations" },
-
     { name: "Admin", path: "/admin" },
   ];
 

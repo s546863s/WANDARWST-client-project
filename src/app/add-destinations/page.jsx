@@ -1,6 +1,10 @@
 "use client";
 
 import React from "react";
+// react-toastify ইম্পোর্ট করা হলো
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 // HeroUI / React Aria Components থেকে ফর্ম উপাদানগুলোর ইম্পোর্ট
 import {
   TextField,
@@ -14,37 +18,53 @@ import {
 } from "@heroui/react";
 
 const Form = () => {
+  // সাবমিট বাটনের লোডিং স্টেট হ্যান্ডেল করার জন্য state
+  const [isPending, setIsPending] = React.useState(false);
+
   const onSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
+    const form = e.currentTarget; // ফর্মের রেফারেন্স রাখা হলো রিসেট করার জন্য
+    const formData = new FormData(form);
 
     const destination = Object.fromEntries(formData.entries());
     console.log(destination);
 
-//  server রেস্পন্স করবে fetch এর লাইন res এর মধ্যে  
-     const res = await fetch('http://localhost:5000/destinations',{
-      method: "POST",
-      headers:{
-        'Content-type': 'application/json'
-      }, // fetch করে method লিখে content-type লিখে বুঝানো যে এইটা post করছি
+    setIsPending(true); // লোডিং শুরু
 
-      body: JSON.stringify(destination) //এখানে কি ; ব্যবহার করা যাবে আর কান যাবে না??
+    try {
+      const res = await fetch('http://localhost:5000/destinations', {
+        method: "POST",
+        headers: {
+          'Content-type': 'application/json'
+        },
+        body: JSON.stringify(destination) // সেমিকোলন দেওয়া যাবে না
+      });
 
+      if (res.ok) {
+        const data = await res.json();
+        console.log(data);
 
-    })
+        // 🎉 সফল হলে টোস্ট নোটিফিকেশন
+        toast.success("Destination added successfully! ✈️");
 
-    const data = await res.json();
-    console.log(data);
-
+        // 🧹 ফর্মের ফিলগুলো ফাঁকা (Reset) করার জন্য
+        form.reset(); 
+      } else {
+        toast.error("Something went wrong. Please try again!");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to connect to the server!");
+    } finally {
+      setIsPending(false); // লোডিং শেষ
+    }
   };
-
-
-
-  // 💡 সাবমিট বাটনের লোডিং স্টেট হ্যান্ডেল করার জন্য (আপাতত ফলস রাখা হয়েছে)
-  const isPending = false;
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-2xl shadow-xs my-6">
+      {/* 🧩 টোস্ট কন্টেইনারটি এখানে যুক্ত করা হলো */}
+      <ToastContainer position="top-center" autoClose={3000} />
+
       <h1 className="text-4xl font-extrabold text-gray-800 mb-6 ">
         Add Destinations
       </h1>
@@ -66,7 +86,7 @@ const Form = () => {
             <FieldError />
           </TextField>
 
-          {/* Category - Updated Select Component */}
+          {/* Category */}
           <div>
             <Select
               name="category"
@@ -133,7 +153,7 @@ const Form = () => {
             </TextField>
           </div>
 
-          {/* Image URL - Removed preview */}
+          {/* Image URL */}
           <div className="md:col-span-2">
             <TextField name="imageUrl" isRequired>
               <Label>Image URL</Label>
